@@ -113,3 +113,25 @@
 	     (let ((r (exp (- (/ R S) (square ax) 0.5625))))
 	       (* (sign x)
 		  (1- (/ r ax)))))))))
+
+(defun bisection (f x-min x-max &key (accuracy 1.0e-6) (max-eval-num 100))
+  (loop
+     with f-min-minusp = (minusp (funcall f x-min))
+     with dx = (if f-min-minusp
+      		   (- x-max x-min)
+      		   (- x-min x-max))
+     with root = (if f-min-minusp
+		     x-min
+		     x-max)
+     repeat max-eval-num
+     as x-mid = (+ root dx)
+     as f-mid = (funcall f x-mid)
+     do (setq dx (/ dx 2))
+     when (not (plusp f-mid))
+     do (setq root x-mid)
+     when (or (< (abs dx) accuracy)
+	      (zerop f-mid))
+     do (return root)
+     finally 
+       (error "maximum number of function evaluations (~D) exceeded" 
+	      max-eval-num)))
