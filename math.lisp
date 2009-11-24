@@ -135,3 +135,63 @@
      finally 
        (error "maximum number of function evaluations (~D) exceeded" 
 	      max-eval-num)))
+
+(defun brent (f x-min x-max &key (accuracy 1.0e-6) (max-eval-num 100))
+  (loop 
+     with d = 0.0 
+     and e = 0.0 
+     and x-acc1 = 0.0
+     and x-mid = (/ (- x-max x-min) 2) 
+     and f-max = (funcall f x-max)
+     and f-min = (funcall f x-min)
+     with root = x-max and f-root = f-max
+     repeat max-eval-num
+     when (plusp (* f-root f-max))
+     do (setq x-max x-min
+	      f-max f-min
+	      d (- root  x-min)
+	      e (- root  x-min))
+     when (< (abs f-max) (abs f-root))
+     do (setq x-min root
+	      root x-max
+	      x-max x-min
+	      f-min f-root
+	      f-root f-max
+	      f-max f-min)
+     do (setq x-acc1 (+ (* 2 least-positive-double-float (abs root))
+			(/ accuracy 2))
+	      x-mid (/ (- x-max root) 2))
+     when (or (<= (abs x-mid) x-acc1) (zerop f-root))
+     do (return root)
+     if (and (>= (abs e) x-acc1)
+	     (> (abs f-min) (abs f-root)))
+     do (let (p q r (s (/ f-root f-min)))
+	  (if (= x-min x-max)
+	      (setq p (* 2 x-mid s)
+		    q (- 1.0 s))
+	      (setq q (/ f-min f-max)
+		    r (/ f-root f-max)
+		    p (* s (- (* 2.0 x-mid q (- q r) )
+			      (* (- root x-min) (1- r))))
+		    q (* (1- q) (1- r) (1- s))))
+	  (when (plusp p) (setq q (* -1 q)))
+	  (let ((p (abs p))
+		(min1 (- (* 3.0 x-mid q) (abs (* x-acc1 q))))
+		(min2 (abs (* e q))))
+	    (if (< (* 2 p) (min min1 min2))
+		(setq e d
+		      d (/ p q))
+		(setq d x-mid
+		      e d))))
+     else
+     do (setq d x-mid
+	      e d)
+     do (progn (setq x-min root
+		     f-min f-root)
+	       (if (> (abs d) x-acc1)
+		   (incf root d)
+		   (incf root (* (sign x-mid) x-acc1)))
+	       (setq f-root (funcall f root)))
+     finally
+       (error "maximum number of function evaluations (~D) exceeded" 
+     	      max-eval-num)))
