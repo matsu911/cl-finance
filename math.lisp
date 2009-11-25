@@ -1,7 +1,7 @@
 (defpackage cl-finance.math
   (:use common-lisp)
   (:nicknames clf.math)
-  (:export erf))
+  (:export erf bisection brent secant))
 
 (in-package cl-finance.math)
 
@@ -195,3 +195,24 @@
      finally
        (error "maximum number of function evaluations (~D) exceeded" 
      	      max-eval-num)))
+
+(defun secant (f x-min x-max &key (accuracy 1.0e-6) (max-eval-num 100))
+  (loop 
+     with f-min = (funcall f x-min)
+     and f-max = (funcall f x-max)
+     with abs-f-min-small-p = (< (abs f-min) (abs f-max))
+     with root = (if abs-f-min-small-p x-min x-max)
+     and f-root = (if abs-f-min-small-p x-min x-max)
+     and xl = (if abs-f-min-small-p x-max x-min)
+     and fl = (if abs-f-min-small-p x-max x-min)
+     repeat max-eval-num
+     for dx = (* (- xl root) (/ f-root (- f-root fl)))
+     do (setq xl root 
+	      fl f-root
+	      root (+ root dx)
+	      f-root (funcall f root))
+     when (or (< (abs dx) accuracy) (zerop f-root))
+     do (return root)
+     finally
+       (error "maximum number of function evaluations (~D) exceeded" 
+	      max-eval-num)))
