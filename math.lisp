@@ -1,7 +1,7 @@
 (defpackage cl-finance.math
   (:use common-lisp)
   (:nicknames clf.math)
-  (:export erf bisection brent secant))
+  (:export erf bisection brent secant ridder))
 
 (in-package cl-finance.math)
 
@@ -213,6 +213,44 @@
 	      f-root (funcall f root))
      when (or (< (abs dx) accuracy) (zerop f-root))
      do (return root)
+     finally
+       (error "maximum number of function evaluations (~D) exceeded" 
+	      max-eval-num)))
+
+(defun ridder (f x-min x-max &key (accuracy 1.0e-6) (max-eval-num 100))
+  (loop
+     with root = most-negative-double-float
+     and next-root = 0.0
+     and f-root = 0.0
+     and f-min = (funcall f x-min)
+     and f-max = (funcall f x-max)
+     repeat max-eval-num
+     for x-mid = (/ (+ x-min x-max) 2)
+     for f-mid = (funcall f x-mid)
+     for s = (sqrt (- (square f-mid) (* f-min f-max)))
+     when (zerop s)
+     do (return root)
+     do (setq next-root (+ x-mid (* (- x-mid x-min)
+				    (/ (* (sign (- f-min f-max)) f-mid) s))))
+     when (<= (abs (- next-root root)) accuracy)
+     do (return root)
+     do (setq root next-root
+	      f-root (funcall f root))
+     when (zerop f-root)
+     do (return root)
+     if (/= (* (sign f-root) f-mid) f-min)
+     do (setq x-min x-mid
+	      f-min f-mid
+	      x-max root
+	      f-max f-root)
+     else if (/= (* (sign f-root) f-min) f-min)
+     do (setq x-max root
+	      f-max f-root)
+     else if (/= (* (sign f-root) f-max) f-max)
+     do (setq x-min root
+	      f-min f-root)
+     else 
+     do (error "never get here.")
      finally
        (error "maximum number of function evaluations (~D) exceeded" 
 	      max-eval-num)))
