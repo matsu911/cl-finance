@@ -254,3 +254,32 @@
      finally
        (error "maximum number of function evaluations (~D) exceeded" 
 	      max-eval-num)))
+
+(defun false-position (f x-min x-max &key (accuracy 1.0e-6) (max-eval-num 100))
+  (loop 
+     with f-min = (funcall f x-min)
+     and f-max = (funcall f x-max)
+     and del = 0.0
+     with f-min-plusp = (plusp f-min)
+     with xl = (if f-min-plusp x-max x-min)
+     and fl = (if f-min-plusp f-max f-min)
+     and xh = (if f-min-plusp x-min x-max)
+     and fh = (if f-min-plusp f-min f-max)
+     with dx = (- xh xl)
+     repeat max-eval-num
+     for root = (+ xl (/ (* dx fl) (- fl fh)))
+     for f-root = (funcall f root)
+     if (plusp f-root)
+     do (setq del (- xh root)
+	      xh root
+	      fh f-root)
+     else
+     do (setq del (- xl root)
+	      xl root
+	      fl f-root)
+     when (or (< (abs del) accuracy) (zerop f-root))
+     do (return root)
+     finally
+       (error "maximum number of function evaluations (~D) exceeded" 
+	      max-eval-num)))
+
