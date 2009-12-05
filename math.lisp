@@ -1,7 +1,7 @@
 (defpackage cl-finance.math
   (:use common-lisp)
   (:nicknames clf.math)
-  (:export erf bisection brent secant ridder))
+  (:export square erf bisection brent secant ridder cumulative-normal-distribution))
 
 (in-package cl-finance.math)
 
@@ -112,7 +112,7 @@
 		       S (polynomial-value ss one sb1 sb2 sb3 sb4 sb5 sb6 sb7)))
 	     (let ((r (exp (- (/ R S) (square ax) 0.5625))))
 	       (* (sign x)
-		  (1- (/ r ax)))))))))
+		  (- 1 (/ r ax)))))))))
 
 (defun bisection (f x-min x-max &key (accuracy 1.0e-6) (max-eval-num 100))
   (loop
@@ -283,3 +283,5 @@
        (error "maximum number of function evaluations (~D) exceeded" 
 	      max-eval-num)))
 
+(defun cumulative-normal-distribution (z)
+  (* 0.5 (1+ (erf (* z (sqrt 2))))))
