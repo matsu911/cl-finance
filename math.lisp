@@ -1,7 +1,13 @@
 (defpackage cl-finance.math
   (:use common-lisp)
   (:nicknames clf.math)
-  (:export square erf bisection brent secant ridder cumulative-normal-distribution))
+  (:export square 
+	   erf 
+	   bisection
+	   brent 
+	   secant
+	   ridder 
+	   cumulative-normal-distribution))
 
 (in-package cl-finance.math)
 

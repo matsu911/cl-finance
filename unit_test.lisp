@@ -1,7 +1,11 @@
 (defpackage cl-finance.unit-test
   (:use common-lisp)
   (:nicknames clf.unit-test)
-  (:export deftest))
+  (:export deftest
+	   close-to
+	   check))
+
+(in-package cl-finance.unit-test)
 
 (defvar *test-name* nil)
 

@@ -4,6 +4,8 @@
   (:import-from clf.math square cumulative-normal-distribution)
   (:export black-scholes))
 
+(in-package cl-finance.model)
+
 (defun black-scholes (type S K time sigma r q)
   (let* ((d+ (/ (+ (log (/ S K))
 		   (* time (+ r (- q) (/ (square sigma) 2))))
