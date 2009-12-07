@@ -3,12 +3,6 @@
 	clf.math
 	clf.unit-test)
   (:nicknames clf.math-test)
-  (:import-from clf.math
-		bisection
-		brent)
-  (:import-from clf.unit-test
-		deftest
-		check)
   (:export test-bisection
 	   test-brent
 	   test-secant
